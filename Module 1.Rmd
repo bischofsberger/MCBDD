@@ -1,0 +1,52 @@
+---
+title: "Module 1"
+author: "Imerio Bischofsberger"
+date: "3/24/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load packages
+
+```{r, message=FALSE}
+library(tidyverse)
+library(magrittr)
+library(ggthemes)
+library(ggrepel)
+library(janitor)
+library(knitr)
+library(Hmisc)
+library(palmerpenguins)
+library(ggpubr)
+library(ggplot2)
+library(broom)
+library(plotly)
+```
+
+```{r}
+# Sensitivity is fixed at 0.99
+sensitivity <- 0.99
+
+# Define the infection prevalence and specificity ranges
+infection_prev <- seq(0.00001, 0.5, length.out = 100)
+specificity <- c(0.99, 0.999, 0.9999, 0.99999)
+
+# Create a grid of infection prevalence and specificity values
+df <- expand.grid(infection_prev, specificity)
+colnames(df) <- c("Infection Prevalence", "Specificity")
+
+# Calculate the probability of infection given a positive test for each combination of infection prevalence and specificity
+df$Probability_of_Infection <- sensitivity * df$`Infection Prevalence` / (sensitivity * df$`Infection Prevalence` + (1 - df$Specificity) * (1 - df$`Infection Prevalence`))
+
+# Create a 3D scatter plot
+plot_ly(df, x = ~`Infection Prevalence`, y = ~Specificity, z = ~Probability_of_Infection, 
+        type = "scatter3d", mode = "markers", color = ~Probability_of_Infection,
+        colors = "Blues", marker = list(size = 3)) %>% 
+  layout(scene = list(xaxis = list(title = "Infection Prevalence"),
+                      yaxis = list(title = "Specificity"),
+                      zaxis = list(title = "Probability of Infection")))
+
+```
